@@ -16,7 +16,7 @@ soup = BeautifulSoup(pagina, 'lxml')
 
 #Solicitando a la pagina el número de productos mostrados
 productos = soup.find_all("li", class_="grid_4")
-#print(len(productos))
+
 
 #Obteniendo el precio de cada producto
 precios = soup.find_all("span", class_="pricee")
@@ -33,30 +33,34 @@ imagelink = soup.find_all(src=re.compile("home_default"))
 #Obteniendo el Identificador de cada producto
 id_products = soup.find_all(rel=re.compile("id_product"))
 
-#Creando lista de productos
-producto = []
+#Creando lista de productos con diccionarios 'producto'
+producto = {}
 Lista_productos = []
 for i in range(len(productos)):
-	producto.append("precio: " + precios[i].get_text())
-	producto.append("nombre: " + nombres[i].get_text())
-	producto.append("URL: " + URL[i].get('href'))
-	producto.append("URL imagen: " + imagelink[i].get('src'))
+	precio = re.search('\d\d.\d\d', precios[i].get_text())
+	producto['precio'] = precio.group()
+	producto['nombre'] = nombres[i].get_text()
+	producto['URL'] = URL[i].get('href')
+	producto['URL Imagen'] = imagelink[i].get('src')
 	for j in range(len(id_products)):
 		if(nombres[i].get_text() == id_products[j].get('namepro')):
-			producto.append(id_products[j].get('rel'))
+			producto['Id_producto'] = id_products[j].get('rel')
 			break;
 	else:
-		producto.append("No tiene id_producto")
+		producto['Id_producto'] = "No tiene id_producto"
 	Lista_productos.append(producto)
+	producto = {}
 
 #Creando archivo json
 with open('products.json','w') as file:
 	json.dump(Lista_productos, file)
 
 #Leyendo archivo json
-with open('products.json','r') as file:
-	lista = json.load(file)
-	print(lista)
+#with open('products.json','r') as file:
+	#lista = json.load(file)
+#for i in range(len(lista)):
+	#print(lista[i])
+	#print("\n")
 
 
 		
